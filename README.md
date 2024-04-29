@@ -1,8 +1,10 @@
 # README
 
-Project using FastAPI, postgres, psycopg and sqlalquemy.
+This project use FastAPI, postgres, psycopg and sqlalquemy.
 
-Remeber create the `.env` file in root of the proyect.
+#### Env
+
+create the `.env` file in root of the proyect.
 
 #### Create virtual enviroment py: `py -m venv venv`
 
@@ -12,13 +14,13 @@ Remeber create the `.env` file in root of the proyect.
 
 #### Install psycopg: `pip install psycopg`
 
-#### Running the app:
+### Running the app:
 
 Use uvicorn for runnig the app: `uvicorn app.main:app`.
 
 Use reload **Only for development**: `uvicorn app.main:app --reload`.
 
-To stop uvicorn runing in windows use _Ctrl + C_ then _Enter_ or _Ctrl + Break_
+To stop uvicorn runing in windows use _Ctrl + C_ then _Enter_ or _Ctrl + Break_.
 
 ### Runing in linux server
 
@@ -30,4 +32,4 @@ To run the app in the server use:
 
 Remenber to change the ip and port.
 
-The other way is creating a service using the file _gunicorn.service_, change the information in the file to macth the server information where the app is going to be deploy, then create a service in the server. 
+The other way is creating a service using the file _gunicorn.service_, change the information in the file to macth the server information where the app is going to be deploy, then create a service in the server.

@@ -1,40 +1,19 @@
-from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-import pytest
-from app.main import app
 from app import schemas
+from .database import client, session
+import pytest
+from jose import jwt
 from app.config import settings
-from app.database import get_db, Base
-from app.main import app
-
-
-SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg://{settings.database_username}:{settings.database_password}@{settings.database_hostname}:{settings.database_port}/{settings.database_name}_test"
-
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
-
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-
-# Dependency
-def override_get_db():
-    db = TestingSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-app.dependency_overrides[get_db] = override_get_db
 
 
 @pytest.fixture
-def client():
-    # Drop all the tables before running test
-    Base.metadata.drop_all(bind=engine)
-    # Create all the talbes before running test
-    Base.metadata.create_all(bind=engine)
-    yield TestClient(app)
+def test_user(client):
+    user_data = {"email": "hola@gmail.com", "password": "pas123"}
+    res = client.post("/users/", json=user_data)
+
+    assert res.status_code == 201
+    new_user = res.json()
+    new_user["password"] = user_data["password"]
+    return new_user
 
 
 def test_root(client):
@@ -49,3 +28,18 @@ def test_create_user(client):
     print(res.json())
     assert new_user.email == "hola@gmail.com"
     assert res.status_code == 201
+
+
+def test_login_user(client, test_user):
+    res = client.post(
+        "/login",
+        data={"username": test_user["email"], "password": test_user["password"]},
+    )
+    login_res = schemas.Token(**res.json())
+    payload = jwt.decode(
+        login_res.access_token, settings.secret_key, algorithms=[settings.algorithm]
+    )
+    id = payload.get("user_id")  # type: ignore
+    assert id == test_user["id"]
+    assert login_res.token_type == "bearer"
+    assert res.status_code == 200

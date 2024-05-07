@@ -54,6 +54,17 @@ def test_user(client):
     return new_user
 
 
+@pytest.fixture
+def test_user2(client):
+    user_data = {"email": "adios@gmail.com", "password": "pas123"}
+    res = client.post("/users/", json=user_data)
+
+    assert res.status_code == 201
+    new_user = res.json()
+    new_user["password"] = user_data["password"]
+    return new_user
+
+
 # create autorization token
 @pytest.fixture
 def token(test_user):
@@ -73,7 +84,7 @@ def create_post_model(post):
 
 
 @pytest.fixture
-def test_posts(test_user, session):
+def test_posts(test_user, session, test_user2):
     posts_data = [
         {
             "title": "first title",
@@ -83,6 +94,11 @@ def test_posts(test_user, session):
         {"title": "2nd title", "content": "2nd content", "owner_id": test_user["id"]},
         {"title": "3rd title", "content": "3rd content", "owner_id": test_user["id"]},
         {"title": "3rd title", "content": "3rd content", "owner_id": test_user["id"]},
+        {
+            "title": "title user 2",
+            "content": "New content",
+            "owner_id": test_user2["id"],
+        },
     ]
 
     post_map = map(create_post_model, posts_data)
